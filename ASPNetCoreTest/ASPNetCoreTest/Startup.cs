@@ -1,13 +1,9 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ASPNetCoreTest
 {
@@ -47,10 +43,16 @@ namespace ASPNetCoreTest
 
             app.UseAuthorization();
 
+            //app.UseEndpoints(endpoints =>
+            //{
+            //    endpoints.MapRazorPages();
+            //});
+
             app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapRazorPages();
-            });
+                endpoints.MapGet("/", async context => 
+                { 
+                    await context.Response.WriteAsync($"RootPath:{env.ContentRootPath}"); 
+                }));
         }
     }
 }
