@@ -23,14 +23,36 @@ namespace ASPNetCoreTest
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
-            //Run не передает запрос дальше
-            //Устанавливать этот метод вконце обработки
+            int x = 5;
+            int y = 8;
+            int z = 0;
+
+            //Use , await next.Invoke() вызывает следующие действие в цепочке
+            app.Use(async (context, next) =>
+            {
+                z = x * y;
+                await next.Invoke();
+            });
+
+            app.Use(async (context, next) =>
+            {
+                z = z / y;
+                await next.Invoke();
+            });
+
             app.Run(async (context) =>
             {
-                await context.Response.WriteAsync("Hello World!");
+                await context.Response.WriteAsync($"x * y = {z}");
             });
+
+            //Скомпилирует но не будет вызова, Run конец
+            //app.Use(async (context, next) =>
+            //{
+            //    z = z / y;
+            //    await next.Invoke();
+            //});
         }
     }
 }
