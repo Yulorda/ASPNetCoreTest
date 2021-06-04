@@ -25,34 +25,54 @@ namespace ASPNetCoreTest
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app)
         {
-            int x = 5;
-            int y = 8;
-            int z = 0;
+            app.MapWhen(context => {
 
-            //Use , await next.Invoke() вызывает следующие действие в цепочке
-            app.Use(async (context, next) =>
-            {
-                z = x * y;
-                await next.Invoke();
-            });
+                return context.Request.Query.ContainsKey("index") &&
+                        context.Request.Query["index"] == "5";
+            }, HandleId);
 
-            app.Use(async (context, next) =>
+            //app.MapWhen(context => {
+
+            //    return context.Request.Query.ContainsKey("index");
+            //}, HandleId);
+
+            // /?index не работает
+            app.Map("/index", Index);
+            app.Map("/about", About);
+
+            app.Map("/home", home =>
             {
-                z = z / y;
-                await next.Invoke();
+                home.Map("/index", Index);
+                home.Map("/about", About);
             });
 
             app.Run(async (context) =>
             {
-                await context.Response.WriteAsync($"x * y = {z}");
+                await context.Response.WriteAsync("Page Not Found");
             });
+        }
 
-            //Скомпилирует но не будет вызова, Run конец
-            //app.Use(async (context, next) =>
-            //{
-            //    z = z / y;
-            //    await next.Invoke();
-            //});
+        private static void HandleId(IApplicationBuilder app)
+        {
+            app.Run(async context =>
+            {
+                await context.Response.WriteAsync("id is equal to 5");
+            });
+        }
+
+        private static void Index(IApplicationBuilder app)
+        {
+            app.Run(async context =>
+            {
+                await context.Response.WriteAsync("Index");
+            });
+        }
+        private static void About(IApplicationBuilder app)
+        {
+            app.Run(async context =>
+            {
+                await context.Response.WriteAsync("About");
+            });
         }
     }
 }
