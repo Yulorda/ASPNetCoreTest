@@ -25,53 +25,15 @@ namespace ASPNetCoreTest
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app)
         {
-            app.MapWhen(context => {
+            // app.UseMiddleware<TokenMiddleware>();
+            // Расширение для класса TokenMiddleware
+            app.UseToken();
 
-                return context.Request.Query.ContainsKey("index") &&
-                        context.Request.Query["index"] == "5";
-            }, HandleId);
-
-            //app.MapWhen(context => {
-
-            //    return context.Request.Query.ContainsKey("index");
-            //}, HandleId);
-
-            // /?index не работает
-            app.Map("/index", Index);
-            app.Map("/about", About);
-
-            app.Map("/home", home =>
-            {
-                home.Map("/index", Index);
-                home.Map("/about", About);
-            });
+            app.UseToken("12345678");
 
             app.Run(async (context) =>
             {
-                await context.Response.WriteAsync("Page Not Found");
-            });
-        }
-
-        private static void HandleId(IApplicationBuilder app)
-        {
-            app.Run(async context =>
-            {
-                await context.Response.WriteAsync("id is equal to 5");
-            });
-        }
-
-        private static void Index(IApplicationBuilder app)
-        {
-            app.Run(async context =>
-            {
-                await context.Response.WriteAsync("Index");
-            });
-        }
-        private static void About(IApplicationBuilder app)
-        {
-            app.Run(async context =>
-            {
-                await context.Response.WriteAsync("About");
+                await context.Response.WriteAsync("Hello World");
             });
         }
     }
