@@ -28,13 +28,15 @@ namespace ASPNetCoreTest
         //IWebHostEnvironment можно добавить к методу конфиг еще один параметр
         public void Configure(IApplicationBuilder app)
         {
-            app.UseStaticFiles(); // обрабатывает все запросы к root папке (может быть переназначена в программ)
-            app.UseStaticFiles(new StaticFileOptions() // обрабатывает запросы к каталогу wwwroot/html
+            //app.UseFileServer();
+            //app.UseFileServer(enableDirectoryBrowsing: true);
+
+            app.UseFileServer(new FileServerOptions
             {
-                FileProvider = new PhysicalFileProvider(
-                    Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\html")),
-                //к файлам в папке wwwroot\html можно обратиться по директории /pages/filename.html
-                RequestPath = new PathString("/pages")
+                EnableDirectoryBrowsing = true,
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"wwwroot\html")),
+                RequestPath = new PathString("/pages"),
+                EnableDefaultFiles = false
             });
 
             app.Run(async (context) =>
