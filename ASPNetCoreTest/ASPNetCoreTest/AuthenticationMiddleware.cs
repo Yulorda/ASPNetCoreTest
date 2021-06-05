@@ -3,24 +3,21 @@ using System.Threading.Tasks;
 
 namespace ASPNetCoreTest
 {
-    public class TokenMiddlewareWithPattern
+    public class AuthenticationMiddleware
     {
-        private readonly RequestDelegate _next;
-        string pattern;
+        private RequestDelegate _next;
 
-        public TokenMiddlewareWithPattern(RequestDelegate next, string pattern)
+        public AuthenticationMiddleware(RequestDelegate next)
         {
-            this._next = next;
-            this.pattern = pattern;
+            _next = next;
         }
 
         public async Task InvokeAsync(HttpContext context)
         {
             var token = context.Request.Query["token"];
-            if (token != pattern)
+            if (string.IsNullOrWhiteSpace(token))
             {
                 context.Response.StatusCode = 403;
-                await context.Response.WriteAsync("Token is invalid");
             }
             else
             {
