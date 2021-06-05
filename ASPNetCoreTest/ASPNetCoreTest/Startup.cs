@@ -26,20 +26,11 @@ namespace ASPNetCoreTest
         //IWebHostEnvironment можно добавить к методу конфиг еще один параметр
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseStaticFiles();
+
             app.Run(async (context) =>
             {
-                //Изменение HTTP заголовка, для последующего корректного вывода символов на страницу
-                context.Response.Headers["Content-Type"] = "text/html; charset=utf-8";
-
-                // Добавилили этот тэг в launchSettings
-                if (env.IsEnvironment("Test")) // Если проект в состоянии "Test"
-                {
-                    await context.Response.WriteAsync("В состоянии тестирования");
-                }
-                else
-                {
-                    await context.Response.WriteAsync("В процессе разработки или в продакшене");
-                }
+                await context.Response.WriteAsync("Hello World");
             });
         }
     }
