@@ -15,7 +15,7 @@ namespace ASPNetCoreTest
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    //Добавление кастомной папки в WebRoot
+                    //Заменя wwwroot на новый
                     webBuilder.UseWebRoot("static");
                 });
     }
