@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -22,11 +23,24 @@ namespace ASPNetCoreTest
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app)
+        //IWebHostEnvironment можно добавить к методу конфиг еще один параметр
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseMiddleware<ErrorHandlingMiddleware>();
-            app.UseMiddleware<AuthenticationMiddleware>();
-            app.UseMiddleware<RoutingMiddleware>();
+            app.Run(async (context) =>
+            {
+                //Изменение HTTP заголовка, для последующего корректного вывода символов на страницу
+                context.Response.Headers["Content-Type"] = "text/html; charset=utf-8";
+
+                // Добавилили этот тэг в launchSettings
+                if (env.IsEnvironment("Test")) // Если проект в состоянии "Test"
+                {
+                    await context.Response.WriteAsync("В состоянии тестирования");
+                }
+                else
+                {
+                    await context.Response.WriteAsync("В процессе разработки или в продакшене");
+                }
+            });
         }
     }
 }
