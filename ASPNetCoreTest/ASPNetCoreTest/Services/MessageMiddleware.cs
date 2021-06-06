@@ -19,7 +19,7 @@ namespace ASPNetCoreTest
             context.Response.ContentType = "text/html;charset=utf-8";
             messageSender.AddMessage("daff");
             messageSender.AddMessage("sms34");
-            await context.Response.WriteAsync(messageSender.GetResult());
+            await next.Invoke(context);
         }
     }
 }

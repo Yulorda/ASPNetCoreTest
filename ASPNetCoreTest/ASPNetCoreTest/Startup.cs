@@ -24,11 +24,15 @@ namespace ASPNetCoreTest
         public void ConfigureServices(IServiceCollection services)
         {
             //Inject
+            //Transient create new after request
+            //ѕерегрузки дл€ инжекта фабрики или типа реализации
+            // Singleton
+            // Scoped inject одинаковых типов во все параметры методов
             services.AddTransient<IMessageFormatter, EmailMessanger>();
-            services.AddSingleton<MessageFormatterServices>();
+            services.AddTransient<MessageFormatterServices>();
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, MessageFormatterServices messageSender)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, MessageFormatterServices messageSender, MessageFormatterServices messageSender2)
         {
             if (env.IsDevelopment())
             {
@@ -51,7 +55,30 @@ namespace ASPNetCoreTest
                 await next.Invoke();
             });
 
-            app.UseMiddleware<MessageMiddleware>();
+            app.Use(async (context, next) =>
+            {
+                //Inject applicationServices
+                ///MessageFormatterServices messageSender = app.ApplicationServices.GetService<MessageFormatterServices>();
+
+                //Inject RequestServices 
+                //если MessageFormatterServices обь€влен как Scoped, он сюда не прокинетс€!!! получим новыэ экземпл€р
+                MessageFormatterServices messageSender = context.RequestServices.GetService<MessageFormatterServices>();
+                //context.Response.ContentType = "text/html;charset=utf-8";
+                messageSender.AddMessage("daff");
+                messageSender.AddMessage("sms");
+                await next.Invoke();
+            });
+
+            //app.UseMiddleware<MessageMiddleware>();
+            //app.UseMiddleware<MessageMiddleware>();
+            //app.UseMiddleware<MessageMiddleware>();
+            //app.UseMiddleware<MessageMiddleware>();
+
+            app.Run(async (context) =>
+            {
+                //≈сли будет объ€влен как Transient вернет пустую строку, в этот экземпл€р мы ничего не писали
+                await context.Response.WriteAsync(messageSender2.GetResult());
+            });
         }
     }
 }
