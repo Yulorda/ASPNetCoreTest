@@ -23,23 +23,35 @@ namespace ASPNetCoreTest
 
         public void ConfigureServices(IServiceCollection services)
         {
+            //Inject
             services.AddTransient<IMessageFormatter, EmailMessanger>();
+            services.AddSingleton<MessageFormatterServices>();
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IMessageFormatter messageSender)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, MessageFormatterServices messageSender)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
+            //Inject with Use
 
-            app.Run(async (context) =>
+
+            app.Use(async (context,next) =>
             {
-                messageSender.Add("daff");
-                messageSender.Add("sms");
-                await context.Response.WriteAsync(messageSender.GetResult());
+                //Inject applicationServices
+                //MessageFormatterServices messageSender = app.ApplicationServices.GetService<MessageFormatterServices>();
+
+                //Inject RequestServices 
+                //MessageFormatterServices messageSender = context.RequestServices.GetService<MessageFormatterServices>();
+                //context.Response.ContentType = "text/html;charset=utf-8";
+                messageSender.AddMessage("daff");
+                messageSender.AddMessage("sms");
+                await next.Invoke();
             });
+
+            app.UseMiddleware<MessageMiddleware>();
         }
     }
 }
