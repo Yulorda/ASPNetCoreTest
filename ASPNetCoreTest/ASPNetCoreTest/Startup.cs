@@ -6,48 +6,47 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
+using System.Text;
 
 namespace ASPNetCoreTest
 {
     public partial class Startup
     {
+        public IConfiguration Configuration { get; }
+        public IServiceCollection Services { get; private set; }
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddRazorPages();
-            services.AddHttpsRedirection(options =>
-            {
-                options.RedirectStatusCode = StatusCodes.Status307TemporaryRedirect;
-                options.HttpsPort = 44344;
-            });
+            //Add services
+            //IoC метод для получения и внежрения зависимостей в проект
+            //services.AddMvc();
+            Services = services;
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        //IWebHostEnvironment можно добавить к методу конфиг еще один параметр
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
-            if (env.IsDevelopment())
+            app.Run(async context =>
             {
-                app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                //Стоит отметить, что метод UseHsts вызывается, если только приложение уже развернуто для полноценного использования,
-                //потому что в процессе разработки использование данного метода может создавать неудобства, так как заголовки кэшируются.
-                app.UseHsts();
-            }
-
-            app.UseHttpsRedirection();
-            app.Run(async (context) =>  
-            {
-                await context.Response.WriteAsync("Hello World!");
+                var sb = new StringBuilder();
+                sb.Append("<h1>Все сервисы</h1>");
+                sb.Append("<table>");
+                sb.Append("<tr><th>Тип</th><th>Lifetime</th><th>Реализация</th></tr>");
+                foreach (var svc in Services)
+                {
+                    sb.Append("<tr>");
+                    sb.Append($"<td>{svc.ServiceType.FullName}</td>");
+                    sb.Append($"<td>{svc.Lifetime}</td>");
+                    sb.Append($"<td>{svc.ImplementationType?.FullName}</td>");
+                    sb.Append("</tr>");
+                }
+                sb.Append("</table>");
+                context.Response.ContentType = "text/html;charset=utf-8";
+                await context.Response.WriteAsync(sb.ToString());
             });
         }
     }
