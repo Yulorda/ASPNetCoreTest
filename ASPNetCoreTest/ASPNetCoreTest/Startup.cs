@@ -1,3 +1,4 @@
+using ASPNetCoreTest.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -22,31 +23,22 @@ namespace ASPNetCoreTest
 
         public void ConfigureServices(IServiceCollection services)
         {
-            //Add services
-            //IoC метод для получения и внежрения зависимостей в проект
-            //services.AddMvc();
-            Services = services;
+            services.AddTransient<IMessageFormatter, EmailMessanger>();
         }
 
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IMessageFormatter messageSender)
         {
-            app.Run(async context =>
+            if (env.IsDevelopment())
             {
-                var sb = new StringBuilder();
-                sb.Append("<h1>Все сервисы</h1>");
-                sb.Append("<table>");
-                sb.Append("<tr><th>Тип</th><th>Lifetime</th><th>Реализация</th></tr>");
-                foreach (var svc in Services)
-                {
-                    sb.Append("<tr>");
-                    sb.Append($"<td>{svc.ServiceType.FullName}</td>");
-                    sb.Append($"<td>{svc.Lifetime}</td>");
-                    sb.Append($"<td>{svc.ImplementationType?.FullName}</td>");
-                    sb.Append("</tr>");
-                }
-                sb.Append("</table>");
-                context.Response.ContentType = "text/html;charset=utf-8";
-                await context.Response.WriteAsync(sb.ToString());
+                app.UseDeveloperExceptionPage();
+            }
+
+
+            app.Run(async (context) =>
+            {
+                messageSender.Add("daff");
+                messageSender.Add("sms");
+                await context.Response.WriteAsync(messageSender.GetResult());
             });
         }
     }
