@@ -1,4 +1,5 @@
 using ASPNetCoreTest.Services;
+using ASPNetCoreTest.Services.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -30,6 +31,7 @@ namespace ASPNetCoreTest
             // Scoped inject одинаковых типов во все параметры методов
             services.AddTransient<IMessageFormatter, EmailMessanger>();
             services.AddTransient<MessageFormatterServices>();
+            services.AddTransient<TimeService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, MessageFormatterServices messageSender, MessageFormatterServices messageSender2)
@@ -41,6 +43,7 @@ namespace ASPNetCoreTest
 
             //Inject with Use
 
+            app.UseMiddleware<TimerMiddleware>();
 
             app.Use(async (context,next) =>
             {
