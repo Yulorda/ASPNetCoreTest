@@ -29,8 +29,10 @@ namespace ASPNetCoreTest
             //Перегрузки для инжекта фабрики или типа реализации
             // Singleton
             // Scoped inject одинаковых типов во все параметры методов
-            services.AddTransient<IMessageFormatter, EmailMessanger>();
-            services.AddTransient<MessageFormatterServices>();
+            services.AddSingleton<IMessageFormatter, EmailMessanger>();
+            services.AddScoped<MessageFormatterServices>();
+            //Sopied / Transient ref not supported
+            services.AddTransient<ITimer, Timer>();
             services.AddTransient<TimeService>();
         }
 
@@ -42,6 +44,7 @@ namespace ASPNetCoreTest
             }
 
             //Inject with Use
+
 
             app.UseMiddleware<TimerMiddleware>();
 
